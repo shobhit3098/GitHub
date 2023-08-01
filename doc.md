@@ -1,0 +1,1 @@
+This is document (doc.md) file.
