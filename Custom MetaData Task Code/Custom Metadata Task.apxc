@@ -1,0 +1,102 @@
+public class MyContactListController {
+    @AuraEnabled
+    public static List<Orderr__C> getContacts(Id recordId) {
+        
+        return [SELECT Id, Name, Account__c , Amount__c , Purchase__c, Quantity__c FROM Orderr__C  WHERE Account__c = :recordId order by createdDate DESC limit 5 ];
+        //Custom_Object__c co = [select Id from Custom_Object__c order by CreatedDate desc limit 1];
+    }
+    @AuraEnabled
+    public static List<Appoinment__c> getAppoinment(Id recordId) {
+        System.debug('Appoinment recordId---------'+recordId);
+        return [SELECT Id,  Start_Date__c FROM Appoinment__c WHERE Account__c = :recordId AND Start_Date__c > TODAY ORDER BY Start_Date__c ASC LIMIT 1];
+    }
+    
+    // Custom Meta Data Work
+    @AuraEnabled
+    public static List<String> getData(Id recordId) {
+        System.debug('recordId 212121---------'+recordId);
+        List<X360_View__mdt> mcs = 	X360_View__mdt.getAll().values();
+        List<String> fieldAPI = new List<String>();
+        
+        system.debug(mcs[0].Mapping__c );
+        String qq ='';
+        String str = mcs[0].Mapping__c;
+        String[] data= str.split(',');
+        System.debug('------------');
+        for(String a : data){
+            String [] spl = a.split('@');
+            System.debug(spl[0]+' '+spl[1]);
+            fieldAPI.add(spl[1]);
+            //qq= qq+',' +spl[1];
+        }
+        System.debug(qq);
+        string query = 'Select Id'+qq+' from  Account where Id=: recordId';
+        List<Account> Acc1 =  Database.query(query);
+        system.debug(query);
+        
+        return fieldAPI;
+        
+        
+        
+    }
+    @AuraEnabled
+    public static List<String> getLabel(Id recordId){
+        List<X360_View__mdt> mcs = 	X360_View__mdt.getAll().values();
+        List<String> fieldLabel = new List<String>();
+        system.debug(mcs[0].Mapping__c );
+        String ll ='';
+        String str = mcs[0].Mapping__c;
+        String[] data= str.split(',');
+        System.debug('------------');
+        for(String a : data){
+            String [] spl = a.split('@');
+            System.debug(spl[0]+' '+spl[1]);
+            //ll= spl[0] + ' ' + ll;
+            fieldLabel.add(spl[0]);
+        }
+        //System.debug(ll);
+        return fieldLabel;
+    }
+    
+    @AuraEnabled
+    public static List<Account> getFData(Id recordId) {
+        System.debug('recordId 212121---------'+recordId);
+        List<X360_View__mdt> mcs = 	X360_View__mdt.getAll().values();
+        
+        system.debug(mcs[0].Mapping__c );
+        String qq ='';
+        String temp ='';
+        String str = mcs[0].Mapping__c;
+        String[] data= str.split(',');
+        System.debug('------------');
+        for(String a : data){
+            String [] spl = a.split('@');
+            System.debug(spl[0]+' '+spl[1]);
+            
+            temp=spl[1];
+            Schema.SObjectType targetType = Schema.getGlobalDescribe().get('Account');
+            List<String> fieldList = new List<String>();
+            Map<String, Schema.SObjectField> fieldMap = targetType.getDescribe().fields.getMap();
+            for (Schema.SObjectField field : fieldMap.values()) {
+                fieldList.add(field.getDescribe().getName());
+            }         
+            for(string str1 : fieldList){
+                if(str1 ==  temp){
+                    System.debug('Yes it contains---------------..............');
+                    qq= qq+',' +spl[1];
+                }
+            }
+            
+        }
+        System.debug(qq);
+        string query = 'Select Id'+qq+' from  Account where Id=: recordId';
+        List<Account> Acc1 =  Database.query(query);
+        system.debug(query);
+        
+        return Acc1;
+        
+        
+        
+    }
+}
+
